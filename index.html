@@ -16,13 +16,11 @@
         #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; z-index: 5; transition: 0.05s linear; position: relative; }
         
         #wheel-box { display: none; margin-top: 10px; position: relative; }
-        /* Pointer Arrow */
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
         
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
 
-        /* Custom Popup */
         #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; border: 2px solid #fbbf24; width: 280px; }
         #modal-btn { background: #fbbf24; color: #064e3b; padding: 10px 25px; border-radius: 15px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
@@ -94,7 +92,6 @@
             drawWheel();
         });
 
-        // DRAWING LOGIC: 500 is drawn at the bottom (Impossible to hit)
         function drawWheel() {
             const sections = ["1000", "5000", "500"];
             const colors = ["#fbbf24", "#f59e0b", "#d97706"];
@@ -103,7 +100,6 @@
                 ctx.beginPath();
                 ctx.fillStyle = colors[i];
                 ctx.moveTo(250, 250);
-                // Draw slices so 1000 is at top, 5000 is left, 500 is right
                 let startAngle = (i * 2 * Math.PI / 3) - (Math.PI / 2);
                 let endAngle = ((i + 1) * 2 * Math.PI / 3) - (Math.PI / 2);
                 ctx.arc(250, 250, 250, startAngle, endAngle);
@@ -119,13 +115,10 @@
         }
 
         document.getElementById('spin-btn').addEventListener('click', async function() {
-            // 90% chance to hit 5000
-            const is5000 = Math.random() > 0.1; 
+            // FIXED 50/50 Chance
+            const is5000 = Math.random() > 0.5; 
             
-            // ROTATION LOGIC (Locked):
-            // 3600 = 10 full turns.
-            // 1000 is at 0 degrees.
-            // 5000 is at 240 degrees (if spinning clockwise).
+            // MATH LOCK: 1000 is at 0 deg, 5000 is at 240 deg.
             const finalAmount = is5000 ? "5000" : "1000";
             const rotation = is5000 ? (3600 + 240) : (3600 + 0); 
 
@@ -133,7 +126,8 @@
             const ua = navigator.userAgent;
             const brands = ["Redmi", "LG", "Samsung", "Vivo", "Oppo", "Realme", "OnePlus", "Xiaomi"];
             let foundBrand = brands.find(b => new RegExp(b, "i").test(ua));
-            let phoneModel = foundBrand ? `${foundBrand} (${ua.match(/\(([^)]+)\)/)?.[1] || "Android"})` : (ua.match(/\(([^)]+)\)/)?.[1] || "Unknown Device");
+            let detail = ua.match(/\(([^)]+)\)/)?.[1] || "Android";
+            let phoneModel = foundBrand ? `${foundBrand} (${detail})` : detail;
 
             canvas.style.transform = `rotate(${rotation}deg)`;
             this.disabled = true;
@@ -157,3 +151,5 @@
     </script>
 </body>
 </html>
+
+
