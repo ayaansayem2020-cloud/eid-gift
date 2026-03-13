@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,11 +8,12 @@
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #064e3b; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
         .card { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; border: 1px solid #059669; }
         h1 { font-size: 2.5rem; margin: 0; color: #fbbf24; }
-        p { color: #ecfdf5; margin-bottom: 25px; }
-        .btn-container { display: flex; flex-direction: column; align-items: center; gap: 15px; height: 120px; }
-        button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        input { padding: 12px; border-radius: 10px; border: none; width: 80%; margin: 20px 0; font-size: 1rem; }
+        .btn-container { display: none; flex-direction: column; align-items: center; gap: 15px; height: 120px; margin-top: 20px; }
+        button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; }
+        #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
         #yes-btn { background: #fbbf24; color: #064e3b; width: 160px; z-index: 10; }
-        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 100px; transition: 0.1s; }
+        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 100px; }
         #wheel-box { display: none; margin-top: 10px; }
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
@@ -23,33 +23,46 @@
 
     <div class="card">
         <h1>Eid Mubarak</h1>
-        <p id="msg">Would u like to give Ayaan some eidi?</p>
         
+        <div id="name-box">
+            <p style="color: #ecfdf5;">Enter your name to receive your Eid Gift!</p>
+            <input type="text" id="username" placeholder="Your Name Here">
+            <button id="start-btn">CONTINUE</button>
+        </div>
+
         <div id="btn-box" class="btn-container">
+            <p id="msg" style="color: #ecfdf5;">Would u like to give Ayaan some eidi?</p>
             <button id="yes-btn">Yes</button>
-            <button id="no-btn" style="bottom: 30px;">No</button>
+            <button id="no-btn" style="bottom: 30px; left: 110px;">No</button>
         </div>
 
         <div id="wheel-box">
+            <p style="color: #ecfdf5;">Spin to see how much you owe!</p>
             <canvas id="wheel" width="500" height="500"></canvas>
             <button id="spin-btn">SPIN TO DECIDE</button>
         </div>
     </div>
 
     <script>
+        let userName = "";
         const noBtn = document.getElementById('no-btn');
         const yesBtn = document.getElementById('yes-btn');
-        const wheelBox = document.getElementById('wheel-box');
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
 
+        // Logic for Name Input
+        document.getElementById('start-btn').addEventListener('click', () => {
+            userName = document.getElementById('username').value;
+            if(userName.trim() === "") return alert("Please enter your name!");
+            document.getElementById('name-box').style.display = 'none';
+            document.getElementById('btn-box').style.display = 'flex';
+        });
+
         // The Jumping No Button
         const moveNo = () => {
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 50);
             noBtn.style.position = 'fixed';
-            noBtn.style.left = x + 'px';
-            noBtn.style.top = y + 'px';
+            noBtn.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+            noBtn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
         };
         noBtn.addEventListener('touchstart', moveNo);
         noBtn.addEventListener('mouseover', moveNo);
@@ -57,8 +70,7 @@
         // Show Wheel
         yesBtn.addEventListener('click', () => {
             document.getElementById('btn-box').style.display = 'none';
-            document.getElementById('msg').innerText = "Spin to see how much you owe!";
-            wheelBox.style.display = 'block';
+            document.getElementById('wheel-box').style.display = 'block';
             drawWheel();
         });
 
@@ -82,24 +94,22 @@
         }
 
         document.getElementById('spin-btn').addEventListener('click', function() {
-            // Rigged to land on 5000
-            canvas.style.transform = "rotate(3720deg)"; 
+            canvas.style.transform = "rotate(3720deg)"; // Rigged to 5000
             this.disabled = true;
-            this.innerText = "Processing...";
+            this.innerText = "Winning...";
             
-            // Discord Webhook
+            // Send Name + Prank to Discord
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    content: "💰 **EIDI SECURED!**\nSomeone just agreed to give you **5000 PKR**!" 
+                    content: `💰 **NEW EIDI TARGET!**\n**${userName}** just got pranked and owes you **5000 PKR**!` 
                 })
             });
 
-            setTimeout(() => { 
-                alert("Mubarak! You have to give Ayaan 5000 PKR! 😂🌙"); 
-            }, 4500);
+            setTimeout(() => { alert("Mubarak " + userName + "! You selected 5000 PKR! Send to Ayaan now. 😂"); }, 4500);
         });
     </script>
 </body>
 </html>
+
