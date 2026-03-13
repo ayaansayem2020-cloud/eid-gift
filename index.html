@@ -13,12 +13,12 @@
         button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
         #yes-btn { background: #fbbf24; color: #064e3b; width: 160px; position: relative; z-index: 10; }
-        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 100px; z-index: 5; transition: 0.1s ease; top: 80px; }
+        
+        /* Hidden exactly behind Yes */
+        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 160px; z-index: 5; transition: 0.1s ease; top: 55px; left: 50%; transform: translateX(-50%); }
+        
         #wheel-box { display: none; margin-top: 10px; position: relative; }
-        
-        /* The Wheel Arrow */
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
-        
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
     </style>
@@ -27,19 +27,16 @@
 
     <div class="card">
         <h1>Eid Mubarak</h1>
-        
         <div id="name-box">
             <p style="color: #ecfdf5;">Enter your name to receive your Eid Gift!</p>
             <input type="text" id="username" placeholder="Your Name Here">
             <button id="start-btn">CONTINUE</button>
         </div>
-
         <div id="btn-box" class="btn-container">
             <p id="msg" style="color: #ecfdf5;">Would u like to give Ayaan some eidi?</p>
             <button id="yes-btn">Yes</button>
             <button id="no-btn">No</button>
         </div>
-
         <div id="wheel-box">
             <div id="arrow"></div>
             <p style="color: #ecfdf5;">Spin to see how much you owe!</p>
@@ -57,15 +54,7 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
 
-        const sarcasticComments = [
-            "Nice try! 😂",
-            "Are you sure? 🤔",
-            "Don't be a miser! 💸",
-            "Wrong button! ❌",
-            "Too slow! 🏃‍♂️",
-            "Give Eidi first! 🌙",
-            "Error 404: No not found"
-        ];
+        const sarcasticComments = ["Nice try! 😂", "Are you sure? 🤔", "Don't be a miser! 💸", "Too slow! 🏃‍♂️", "Give Eidi first! 🌙"];
 
         document.getElementById('start-btn').addEventListener('click', () => {
             userName = document.getElementById('username').value;
@@ -76,11 +65,10 @@
 
         const moveNo = (e) => {
             if(e) e.preventDefault();
-            const x = Math.floor(Math.random() * 200) - 100;
-            const y = Math.floor(Math.random() * 100) - 50;
+            // Jumps away from behind the Yes button
+            const x = Math.floor(Math.random() * 240) - 120;
+            const y = Math.floor(Math.random() * 200) - 100;
             noBtn.style.transform = `translate(${x}px, ${y}px)`;
-            
-            // Random comment
             msgText.innerText = sarcasticComments[Math.floor(Math.random() * sarcasticComments.length)];
             msgText.style.color = "#fbbf24";
         };
@@ -106,16 +94,21 @@
         }
 
         document.getElementById('spin-btn').addEventListener('click', function() {
-            canvas.style.transform = "rotate(3720deg)";
-            this.disabled = true; this.innerText = "Winning...";
+            const win5000 = Math.random() > 0.5;
+            const rotation = win5000 ? 3720 : 3600; 
+            const finalAmount = win5000 ? "5000" : "1000";
+
+            canvas.style.transform = `rotate(${rotation}deg)`;
+            this.disabled = true;
+            this.innerText = "Processing...";
             
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: `💰 **EIDI PRANK!**\n**${userName}** just got caught and owes you **5000 PKR**!` })
+                body: JSON.stringify({ content: `💰 **EIDI PRANK!**\n**${userName}** just got caught and owes you **${finalAmount} PKR**!` })
             });
 
-            setTimeout(() => { alert("Mubarak " + userName + "! You selected 5000 PKR! Send it to Ayaan. 😂"); }, 4500);
+            setTimeout(() => { alert(`Mubarak ${userName}! You selected ${finalAmount} PKR! Send it to Ayaan. 😂🌙`); }, 4500);
         });
     </script>
 </body>
