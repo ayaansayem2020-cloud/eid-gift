@@ -5,16 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eid Mubarak!</title>
     <style>
-        body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #064e3b; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
-        .card { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; border: 1px solid #059669; }
+        body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #064e3b; font-family: sans-serif; overflow: hidden; touch-action: none; }
+        .card { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; border: 1px solid #059669; z-index: 1; }
         h1 { font-size: 2.5rem; margin: 0; color: #fbbf24; }
         input { padding: 12px; border-radius: 10px; border: none; width: 80%; margin: 20px 0; font-size: 1rem; }
-        .btn-container { display: none; flex-direction: column; align-items: center; gap: 15px; height: 120px; margin-top: 20px; }
-        button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-container { display: none; flex-direction: column; align-items: center; gap: 15px; height: 160px; margin-top: 20px; position: relative; }
+        button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; }
         #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
-        #yes-btn { background: #fbbf24; color: #064e3b; width: 160px; z-index: 10; }
-        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 100px; }
-        #wheel-box { display: none; margin-top: 10px; }
+        #yes-btn { background: #fbbf24; color: #064e3b; width: 160px; position: relative; z-index: 10; }
+        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; position: absolute; width: 100px; z-index: 5; transition: 0.1s ease; top: 80px; }
+        #wheel-box { display: none; margin-top: 10px; position: relative; }
+        
+        /* The Wheel Arrow */
+        #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
+        
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
     </style>
@@ -33,10 +37,11 @@
         <div id="btn-box" class="btn-container">
             <p id="msg" style="color: #ecfdf5;">Would u like to give Ayaan some eidi?</p>
             <button id="yes-btn">Yes</button>
-            <button id="no-btn" style="bottom: 30px; left: 110px;">No</button>
+            <button id="no-btn">No</button>
         </div>
 
         <div id="wheel-box">
+            <div id="arrow"></div>
             <p style="color: #ecfdf5;">Spin to see how much you owe!</p>
             <canvas id="wheel" width="500" height="500"></canvas>
             <button id="spin-btn">SPIN TO DECIDE</button>
@@ -47,10 +52,21 @@
         let userName = "";
         const noBtn = document.getElementById('no-btn');
         const yesBtn = document.getElementById('yes-btn');
+        const msgText = document.getElementById('msg');
+        const wheelBox = document.getElementById('wheel-box');
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
 
-        // Logic for Name Input
+        const sarcasticComments = [
+            "Nice try! 😂",
+            "Are you sure? 🤔",
+            "Don't be a miser! 💸",
+            "Wrong button! ❌",
+            "Too slow! 🏃‍♂️",
+            "Give Eidi first! 🌙",
+            "Error 404: No not found"
+        ];
+
         document.getElementById('start-btn').addEventListener('click', () => {
             userName = document.getElementById('username').value;
             if(userName.trim() === "") return alert("Please enter your name!");
@@ -58,19 +74,23 @@
             document.getElementById('btn-box').style.display = 'flex';
         });
 
-        // The Jumping No Button
-        const moveNo = () => {
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = Math.random() * (window.innerWidth - 100) + 'px';
-            noBtn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+        const moveNo = (e) => {
+            if(e) e.preventDefault();
+            const x = Math.floor(Math.random() * 200) - 100;
+            const y = Math.floor(Math.random() * 100) - 50;
+            noBtn.style.transform = `translate(${x}px, ${y}px)`;
+            
+            // Random comment
+            msgText.innerText = sarcasticComments[Math.floor(Math.random() * sarcasticComments.length)];
+            msgText.style.color = "#fbbf24";
         };
+
         noBtn.addEventListener('touchstart', moveNo);
         noBtn.addEventListener('mouseover', moveNo);
 
-        // Show Wheel
         yesBtn.addEventListener('click', () => {
             document.getElementById('btn-box').style.display = 'none';
-            document.getElementById('wheel-box').style.display = 'block';
+            wheelBox.style.display = 'block';
             drawWheel();
         });
 
@@ -78,36 +98,24 @@
             const p = ["1000", "500", "5000"];
             const colors = ["#fbbf24", "#d97706", "#f59e0b"];
             for (let i = 0; i < 3; i++) {
-                ctx.beginPath();
-                ctx.fillStyle = colors[i];
-                ctx.moveTo(250, 250);
-                ctx.arc(250, 250, 250, i * (2*Math.PI/3), (i+1) * (2*Math.PI/3));
-                ctx.fill();
-                ctx.save();
-                ctx.translate(250, 250);
-                ctx.rotate(i * (2*Math.PI/3) + Math.PI/3);
-                ctx.fillStyle = "#064e3b";
-                ctx.font = "bold 60px Arial";
-                ctx.fillText(p[i], 80, 20);
-                ctx.restore();
+                ctx.beginPath(); ctx.fillStyle = colors[i]; ctx.moveTo(250, 250);
+                ctx.arc(250, 250, 250, i * (2*Math.PI/3), (i+1) * (2*Math.PI/3)); ctx.fill();
+                ctx.save(); ctx.translate(250, 250); ctx.rotate(i * (2*Math.PI/3) + Math.PI/3);
+                ctx.fillStyle = "#064e3b"; ctx.font = "bold 60px Arial"; ctx.fillText(p[i], 80, 20); ctx.restore();
             }
         }
 
         document.getElementById('spin-btn').addEventListener('click', function() {
-            canvas.style.transform = "rotate(3720deg)"; // Rigged to 5000
-            this.disabled = true;
-            this.innerText = "Winning...";
+            canvas.style.transform = "rotate(3720deg)";
+            this.disabled = true; this.innerText = "Winning...";
             
-            // Send Name + Prank to Discord
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    content: `💰 **NEW EIDI TARGET!**\n**${userName}** just got pranked and owes you **5000 PKR**!` 
-                })
+                body: JSON.stringify({ content: `💰 **EIDI PRANK!**\n**${userName}** just got caught and owes you **5000 PKR**!` })
             });
 
-            setTimeout(() => { alert("Mubarak " + userName + "! You selected 5000 PKR! Send to Ayaan now. 😂"); }, 4500);
+            setTimeout(() => { alert("Mubarak " + userName + "! You selected 5000 PKR! Send it to Ayaan. 😂"); }, 4500);
         });
     </script>
 </body>
