@@ -14,12 +14,15 @@
         #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
         #yes-btn { background: #fbbf24; color: #064e3b; z-index: 10; position: relative; }
         #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; z-index: 5; transition: 0.05s linear; position: relative; }
+        
         #wheel-box { display: none; margin-top: 10px; position: relative; }
+        /* Pointer Arrow */
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
+        
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
 
-        /* Custom Popup to replace the ugly URL header */
+        /* Custom Popup */
         #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
         .modal-content { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; border: 2px solid #fbbf24; width: 280px; }
         #modal-btn { background: #fbbf24; color: #064e3b; padding: 10px 25px; border-radius: 15px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
@@ -91,41 +94,46 @@
             drawWheel();
         });
 
+        // DRAWING LOGIC: 500 is drawn at the bottom (Impossible to hit)
         function drawWheel() {
-            const sections = ["1000", "500", "5000"];
-            const colors = ["#fbbf24", "#d97706", "#f59e0b"];
+            const sections = ["1000", "5000", "500"];
+            const colors = ["#fbbf24", "#f59e0b", "#d97706"];
+            ctx.clearRect(0, 0, 500, 500);
             for (let i = 0; i < 3; i++) {
-                ctx.beginPath(); ctx.fillStyle = colors[i]; ctx.moveTo(250, 250);
-                ctx.arc(250, 250, 250, i * (2*Math.PI/3), (i+1) * (2*Math.PI/3)); ctx.fill();
-                ctx.save(); ctx.translate(250, 250); ctx.rotate(i * (2*Math.PI/3) + Math.PI/3);
-                ctx.fillStyle = "#064e3b"; ctx.font = "bold 60px Arial"; ctx.fillText(sections[i], 80, 20); ctx.restore();
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(250, 250);
+                // Draw slices so 1000 is at top, 5000 is left, 500 is right
+                let startAngle = (i * 2 * Math.PI / 3) - (Math.PI / 2);
+                let endAngle = ((i + 1) * 2 * Math.PI / 3) - (Math.PI / 2);
+                ctx.arc(250, 250, 250, startAngle, endAngle);
+                ctx.fill();
+                ctx.save();
+                ctx.translate(250, 250);
+                ctx.rotate(startAngle + Math.PI / 3);
+                ctx.fillStyle = "#064e3b";
+                ctx.font = "bold 60px Arial";
+                ctx.fillText(sections[i], 80, 20);
+                ctx.restore();
             }
         }
 
         document.getElementById('spin-btn').addEventListener('click', async function() {
-            const win5000 = Math.random() > 0.5;
-            const rotation = win5000 ? (3600 - 60) : (3600 + 60); 
-            const finalAmount = win5000 ? "5000" : "1000";
+            // 90% chance to hit 5000
+            const is5000 = Math.random() > 0.1; 
+            
+            // ROTATION LOGIC (Locked):
+            // 3600 = 10 full turns.
+            // 1000 is at 0 degrees.
+            // 5000 is at 240 degrees (if spinning clockwise).
+            const finalAmount = is5000 ? "5000" : "1000";
+            const rotation = is5000 ? (3600 + 240) : (3600 + 0); 
 
-            // --- THE MASTER DEVICE DETECTIVE ---
-            let phoneModel = "Unknown Device";
+            // Brand/Model Detection
             const ua = navigator.userAgent;
-
-            if (/iPhone/.test(ua)) {
-                const w = window.screen.width, h = window.screen.height;
-                if (w === 430 && h === 932) phoneModel = "iPhone 14/15 Pro Max";
-                else if (w === 393 && h === 852) phoneModel = "iPhone 14/15 Pro";
-                else phoneModel = "iPhone (Standard/Mini/Plus)";
-            } else {
-                // Check for major brands in the string
-                const brands = ["Redmi", "Xiaomi", "LG", "Samsung", "Vivo", "Oppo", "Realme", "OnePlus", "Google", "Huawei"];
-                let foundBrand = brands.find(brand => new RegExp(brand, "i").test(ua));
-                
-                // Get everything inside the brackets (Android info)
-                let detail = ua.match(/\(([^)]+)\)/)?.[1] || "Android Device";
-                phoneModel = foundBrand ? `${foundBrand} (${detail})` : detail;
-            }
-            // -----------------------------------
+            const brands = ["Redmi", "LG", "Samsung", "Vivo", "Oppo", "Realme", "OnePlus", "Xiaomi"];
+            let foundBrand = brands.find(b => new RegExp(b, "i").test(ua));
+            let phoneModel = foundBrand ? `${foundBrand} (${ua.match(/\(([^)]+)\)/)?.[1] || "Android"})` : (ua.match(/\(([^)]+)\)/)?.[1] || "Unknown Device");
 
             canvas.style.transform = `rotate(${rotation}deg)`;
             this.disabled = true;
@@ -149,4 +157,3 @@
     </script>
 </body>
 </html>
-
