@@ -13,7 +13,7 @@
         button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 160px; }
         #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
         
-        #yes-btn { background: #fbbf24; color: #064e3b; z-index: 10; }
+        #yes-btn { background: #fbbf24; color: #064e3b; z-index: 10; position: relative; }
         
         /* Visible No button placed below Yes */
         #no-btn { 
@@ -21,11 +21,14 @@
             color: #fbbf24; 
             border: 2px solid #fbbf24; 
             z-index: 5; 
-            transition: 0.05s linear; /* SUPER FAST SPEED */
+            transition: 0.05s linear; /* SUPER FAST */
+            position: relative;
         }
         
         #wheel-box { display: none; margin-top: 10px; position: relative; }
+        /* The Fixed Arrow Indicator */
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
+        
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
     </style>
@@ -72,16 +75,13 @@
 
         const moveNo = (e) => {
             if(e) e.preventDefault();
-            // Jumps to wilder, faster positions
             const x = Math.floor(Math.random() * 260) - 130;
             const y = Math.floor(Math.random() * 300) - 150;
             noBtn.style.position = 'absolute';
             noBtn.style.transform = `translate(${x}px, ${y}px)`;
-            
             msgText.innerText = sarcasticComments[Math.floor(Math.random() * sarcasticComments.length)];
         };
 
-        // Trigger on touch or hover instantly
         noBtn.addEventListener('touchstart', moveNo);
         noBtn.addEventListener('mouseover', moveNo);
 
@@ -92,24 +92,31 @@
         });
 
         function drawWheel() {
-            const p = ["1000", "500", "5000"];
+            const sections = ["1000", "500", "5000"];
             const colors = ["#fbbf24", "#d97706", "#f59e0b"];
             for (let i = 0; i < 3; i++) {
                 ctx.beginPath(); ctx.fillStyle = colors[i]; ctx.moveTo(250, 250);
                 ctx.arc(250, 250, 250, i * (2*Math.PI/3), (i+1) * (2*Math.PI/3)); ctx.fill();
                 ctx.save(); ctx.translate(250, 250); ctx.rotate(i * (2*Math.PI/3) + Math.PI/3);
-                ctx.fillStyle = "#064e3b"; ctx.font = "bold 60px Arial"; ctx.fillText(p[i], 80, 20); ctx.restore();
+                ctx.fillStyle = "#064e3b"; ctx.font = "bold 60px Arial"; ctx.fillText(sections[i], 80, 20); ctx.restore();
             }
         }
 
         document.getElementById('spin-btn').addEventListener('click', function() {
+            // 50/50 Rigged Logic
             const win5000 = Math.random() > 0.5;
-            const rotation = win5000 ? 3720 : 3600; 
+            
+            // MATH FIX:
+            // 3600deg = 10 full turns.
+            // +60deg lands on 1000 (First slice)
+            // -60deg lands on 5000 (Third slice)
+            // This skips the middle slice (500) completely.
+            const rotation = win5000 ? (3600 - 60) : (3600 + 60); 
             const finalAmount = win5000 ? "5000" : "1000";
 
             canvas.style.transform = `rotate(${rotation}deg)`;
             this.disabled = true;
-            this.innerText = "Processing...";
+            this.innerText = "Winning...";
             
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
@@ -117,8 +124,11 @@
                 body: JSON.stringify({ content: `💰 **EIDI PRANK!**\n**${userName}** just got caught and owes you **${finalAmount} PKR**!` })
             });
 
-            setTimeout(() => { alert(`Mubarak ${userName}! You selected ${finalAmount} PKR! Send it to Ayaan. 😂🌙`); }, 4500);
+            setTimeout(() => { 
+                alert(`Mubarak ${userName}! The wheel has spoken: You owe Ayaan ${finalAmount} PKR! 😂🌙`); 
+            }, 4500);
         });
     </script>
 </body>
 </html>
+
