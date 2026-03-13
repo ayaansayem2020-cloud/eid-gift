@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Give me eidi</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eid Mubarak!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: radial-gradient(circle, #065f46 0%, #064e3b 100%); 
+            color: #fbbf24; 
+            text-align: center; 
+            font-family: 'Segoe UI', sans-serif; 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        .cursive-title { 
+            font-family: 'Great Vibes', cursive; 
+            font-size: 60px; /* Large cursive text */
+            margin-bottom: 5px;
+            color: #fbbf24;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .container { 
+            padding: 30px; 
+            border: 2px solid #fbbf24;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            width: 85%;
+            max-width: 400px;
+            z-index: 1;
+        }
+        p { font-size: 18px; margin-bottom: 35px; color: #fef3c7; font-weight: 500; }
+        
+        button { 
+            padding: 15px 35px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            border-radius: 12px; 
+            border: none; 
+            cursor: pointer;
+        }
+        
+        #yes { background: #fbbf24; color: #064e3b; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        #no { 
+            background: white; 
+            color: black; 
+            position: absolute; 
+            top: 75%; 
+            left: 50%; 
+            transform: translateX(-50%);
+            transition: 0.1s;
+            z-index: 2;
+        }
+
+        #customModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fef3c7;
+            color: #064e3b;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            z-index: 100;
+            width: 80%;
+            max-width: 350px;
+        }
+        #customModal h2 { margin: 0 0 15px 0; font-size: 20px; }
+        #modalBtn { background: #064e3b; color: #fbbf24; padding: 10px 20px; margin-top: 15px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="cursive-title">Eid Mubarak</div>
+        <p>Would you like to give Eidi to Ayaan??</p>
+        <button id="yes" onclick="notifyDiscord()">YES</button>
+    </div>
+
+    <button id="no" ontouchstart="move()" onmouseover="move()">NO</button>
+
+    <div id="customModal">
+        <h2>Ayaan said thank you for your understanding</h2>
+        <button id="modalBtn" onclick="closeAll()">OK</button>
+    </div>
+
+    <script>
+        window.onbeforeunload = function() { return "Don't leave without giving Eidi!"; };
+
+        function move() {
+            const btn = document.getElementById('no');
+            const x = Math.random() * (window.innerWidth - 110);
+            const y = Math.random() * (window.innerHeight - 60);
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+            btn.style.transform = 'none';
+        }
+
+        async function notifyDiscord() {
+            const webhookURL = "https://discord.com/api/webhooks/1481791614996451383/2nxjo9ewAy4lStk4EGSJ0qx3w3RzHuRqcw_bFwdsthQzfk3vAVOhIJSJO2iMowU8q7Ry";
+            
+            const ua = navigator.userAgent;
+            let device = "Unknown Device";
+            if (/android/i.test(ua)) device = "Android Phone";
+            else if (/iPhone|iPad|iPod/i.test(ua)) device = "Apple iPhone/iPad";
+            else if (/Windows/i.test(ua)) device = "Windows PC";
+            else if (/Mac/i.test(ua)) device = "MacBook";
+
+            const payload = {
+                embeds: [{
+                    title: "💰 Eidi Alert!",
+                    description: "Target has clicked **YES**",
+                    color: 16507684, 
+                    fields: [
+                        { name: "📱 Device Type", value: device, inline: true },
+                        { name: "⏰ Time Received", value: new Date().toLocaleTimeString(), inline: true }
+                    ],
+                    footer: { text: "Prank System Active" }
+                }]
+            };
+
+            try {
+                await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {}
+
+            window.onbeforeunload = null;
+            document.getElementById('customModal').style.display = 'block';
+        }
+
+        function closeAll() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
