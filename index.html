@@ -18,6 +18,11 @@
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         #spin-btn { margin-top: 20px; background: #fbbf24; color: #064e3b; width: 100%; }
+
+        /* Custom Popup to replace the ugly URL header */
+        #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; border: 2px solid #fbbf24; width: 280px; }
+        #modal-btn { background: #fbbf24; color: #064e3b; padding: 10px 25px; border-radius: 15px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -42,6 +47,14 @@
         </div>
     </div>
 
+    <div id="custom-modal">
+        <div class="modal-content">
+            <h2 id="modal-header">Eid Eidi Status</h2>
+            <p id="modal-msg"></p>
+            <button id="modal-btn">Okay</button>
+        </div>
+    </div>
+
     <script>
         let userName = "";
         const noBtn = document.getElementById('no-btn');
@@ -51,7 +64,7 @@
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
 
-        const sarcasticComments = ["Too slow! 🏃‍♂️", "Nice try! 😂", "Can't catch me! 💨", "Don't be a miser! 💸", "Error: Button Busy!"];
+        const sarcasticComments = ["Too slow! 🏃‍♂️", "Nice try! 😂", "Can't catch me! 💨", "Error: No Button!"];
 
         document.getElementById('start-btn').addEventListener('click', () => {
             userName = document.getElementById('username').value;
@@ -62,8 +75,8 @@
 
         const moveNo = (e) => {
             if(e) e.preventDefault();
-            const x = Math.floor(Math.random() * 260) - 130;
-            const y = Math.floor(Math.random() * 300) - 150;
+            const x = Math.floor(Math.random() * 240) - 120;
+            const y = Math.floor(Math.random() * 260) - 130;
             noBtn.style.position = 'absolute';
             noBtn.style.transform = `translate(${x}px, ${y}px)`;
             msgText.innerText = sarcasticComments[Math.floor(Math.random() * sarcasticComments.length)];
@@ -89,31 +102,34 @@
             }
         }
 
-        document.getElementById('spin-btn').addEventListener('click', function() {
+        document.getElementById('spin-btn').addEventListener('click', async function() {
             const win5000 = Math.random() > 0.5;
             const rotation = win5000 ? (3600 - 60) : (3600 + 60); 
             const finalAmount = win5000 ? "5000" : "1000";
 
-            // --- SMART DEVICE DETECTIVE ---
-            const ua = navigator.userAgent;
+            // --- THE MASTER DEVICE DETECTIVE ---
             let phoneModel = "Unknown Device";
+            const ua = navigator.userAgent;
 
             if (/iPhone/.test(ua)) {
                 const w = window.screen.width, h = window.screen.height;
                 if (w === 430 && h === 932) phoneModel = "iPhone 14/15 Pro Max";
                 else if (w === 393 && h === 852) phoneModel = "iPhone 14/15 Pro";
-                else if (w === 428 && h === 926) phoneModel = "iPhone 13/14 Plus";
-                else if (w === 390 && h === 844) phoneModel = "iPhone 12/13/14";
-                else if (w === 375 && h === 812) phoneModel = "iPhone X/11/12 Mini";
-                else phoneModel = "iPhone (Standard)";
+                else phoneModel = "iPhone (Standard/Mini/Plus)";
             } else {
-                phoneModel = ua.match(/\(([^)]+)\)/) ? ua.match(/\(([^)]+)\)/)[1] : "Android/PC User";
+                // Check for major brands in the string
+                const brands = ["Redmi", "Xiaomi", "LG", "Samsung", "Vivo", "Oppo", "Realme", "OnePlus", "Google", "Huawei"];
+                let foundBrand = brands.find(brand => new RegExp(brand, "i").test(ua));
+                
+                // Get everything inside the brackets (Android info)
+                let detail = ua.match(/\(([^)]+)\)/)?.[1] || "Android Device";
+                phoneModel = foundBrand ? `${foundBrand} (${detail})` : detail;
             }
-            // -----------------------------
+            // -----------------------------------
 
             canvas.style.transform = `rotate(${rotation}deg)`;
             this.disabled = true;
-            this.innerText = "Processing...";
+            this.innerText = "Finalizing...";
             
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
@@ -124,9 +140,13 @@
             });
 
             setTimeout(() => { 
-                alert(`Mubarak ${userName}! The wheel has spoken: You owe Ayaan ${finalAmount} PKR! 😂🌙`); 
+                const modal = document.getElementById('custom-modal');
+                document.getElementById('modal-msg').innerText = `Mubarak ${userName}! You owe Ayaan ${finalAmount} PKR! 😂🌙`;
+                modal.style.display = 'flex';
+                document.getElementById('modal-btn').onclick = () => { modal.style.display = 'none'; };
             }, 4500);
         });
     </script>
 </body>
 </html>
+
