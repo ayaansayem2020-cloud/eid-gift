@@ -7,70 +7,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #064e3b; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        
-        .card { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; border: 1px solid #059669; z-index: 5; transition: transform 0.1s; }
-        
+        .card { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative; border: 1px solid #059669; z-index: 5; }
         h1 { font-family: 'Great Vibes', cursive; font-size: 4.5rem; margin: 0 0 10px 0; color: #fbbf24; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-
         input { padding: 12px; border-radius: 10px; border: none; width: 85%; margin: 15px 0; font-size: 1.1rem; outline: none; background: #ecfdf5; color: #064e3b; text-align: center; }
-        
         .btn-container { display: none; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px; position: relative; min-height: 160px; }
-        
         button { padding: 12px 35px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; font-size: 1rem; width: 170px; transition: 0.2s; }
-        
         #start-btn { background: #fbbf24; color: #064e3b; width: 100%; }
         #yes-btn { background: #fbbf24; color: #064e3b; z-index: 10; order: 2; }
-        
-        #no-btn { 
-            background: transparent; 
-            color: #fbbf24; 
-            border: 2px solid #fbbf24; 
-            z-index: 999; 
-            position: relative; 
-            order: 1; 
-            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        
+        #no-btn { background: transparent; color: #fbbf24; border: 2px solid #fbbf24; z-index: 999; position: relative; order: 1; transition: all 0.15s ease-out; }
         #wheel-box { display: none; margin-top: 10px; position: relative; }
         #arrow { width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #fbbf24; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); z-index: 20; }
-        
         canvas { width: 250px; height: 250px; border-radius: 50%; border: 6px solid #fbbf24; background: #fbbf24; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
-
-        /* Verification Lock Screen */
         #lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #064e3b; z-index: 3000; flex-direction: column; justify-content: center; align-items: center; color: #fbbf24; text-align: center; padding: 20px; }
-        
         #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: #065f46; padding: 30px; border-radius: 20px; text-align: center; color: #fbbf24; border: 2px solid #fbbf24; width: 280px; }
-        
-        .shake { animation: shake 0.2s ease-in-out; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
         <h2 style="font-family: 'Oswald', sans-serif;">VERIFICATION REQUIRED</h2>
-        <p style="opacity: 0.8;">A previous session was detected.<br>Enter the 5-digit bypass code to reset.</p>
+        <p>This session is locked.<br>Enter the unique Admin Code to reset.</p>
         <input type="number" id="bypass-input" placeholder="0 0 0 0 0">
         <button onclick="checkBypass()" style="background: #fbbf24; color: #064e3b;">VERIFY & RESET</button>
-        <p id="error-msg" style="color: #f87171; margin-top: 10px; display: none; font-size: 0.8rem;">ERROR: INVALID CODE</p>
+        <p id="error-msg" style="color: #f87171; margin-top: 10px; display: none;">INVALID CODE</p>
     </div>
 
     <div class="card" id="main-card">
         <h1>Eid Mubarak</h1>
         <div id="name-box">
-            <p style="color: #ecfdf5;">Enter your name for your Eid Gift!</p>
+            <p>Enter your name for your Eid Gift!</p>
             <input type="text" id="username" placeholder="Your Name">
             <button id="start-btn">CONTINUE</button>
         </div>
         <div id="btn-box" class="btn-container">
-            <p id="msg" style="color: #ecfdf5;">Would u like to give Ayaan some eidi?</p>
+            <p id="msg">Would u like to give Ayaan some eidi?</p>
             <button id="no-btn">No</button>
             <button id="yes-btn">Yes</button>
         </div>
         <div id="wheel-box">
             <div id="arrow"></div>
-            <p style="color: #ecfdf5; font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9;">Swipe down on the wheel to spin!</p>
+            <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9;">Swipe down to spin!</p>
             <canvas id="wheel" width="500" height="500"></canvas>
             <p id="status-text" style="margin-top:15px; font-weight:bold;"></p>
         </div>
@@ -85,17 +62,14 @@
     </div>
 
     <script>
-        const ADMIN_CODE = "78692"; 
         let userName = "";
         let isSpinning = false;
         let startY = 0;
         const noBtn = document.getElementById('no-btn');
         const yesBtn = document.getElementById('yes-btn');
-        const card = document.getElementById('main-card');
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
 
-        // Check if locked on refresh
         window.onload = () => {
             if (localStorage.getItem('eidi_locked') === 'true') {
                 document.getElementById('lock-screen').style.display = 'flex';
@@ -104,12 +78,13 @@
         };
 
         function checkBypass() {
-            if (document.getElementById('bypass-input').value === ADMIN_CODE) {
-                localStorage.removeItem('eidi_locked');
+            const currentCode = localStorage.getItem('active_admin_code');
+            if (document.getElementById('bypass-input').value === currentCode) {
+                localStorage.clear(); // Clears lock and the code
                 location.reload();
             } else {
                 document.getElementById('error-msg').style.display = 'block';
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                if (navigator.vibrate) navigator.vibrate(100);
             }
         }
 
@@ -123,22 +98,11 @@
         const moveNo = (e) => {
             if(e) e.preventDefault();
             if (navigator.vibrate) navigator.vibrate(40);
-            
-            if (noBtn.style.position !== 'fixed') {
-                noBtn.style.position = 'fixed';
-                noBtn.style.width = '170px'; 
-            }
-            
+            noBtn.style.position = 'fixed';
             noBtn.style.left = Math.random() * (window.innerWidth - 170) + 'px';
             noBtn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
-            
-            card.classList.add('shake');
-            setTimeout(() => card.classList.remove('shake'), 200);
-            document.getElementById('msg').innerText = "Catch me! 😂";
         };
-
         noBtn.addEventListener('touchstart', moveNo);
-        noBtn.addEventListener('mouseover', moveNo);
 
         yesBtn.addEventListener('click', () => {
             document.getElementById('btn-box').style.display = 'none';
@@ -148,7 +112,7 @@
         });
 
         function drawWheel() {
-            const sections = ["10,000", "50,000", "5,000"];
+            const sections = ["1000", "5000", "500"];
             const colors = ["#fbbf24", "#f59e0b", "#d97706"];
             ctx.clearRect(0, 0, 500, 500);
             for (let i = 0; i < 3; i++) {
@@ -157,53 +121,52 @@
                 let eA = ((i + 1) * 2 * Math.PI / 3) - (Math.PI / 2);
                 ctx.arc(250, 250, 250, sA, eA); ctx.fill();
                 ctx.save(); ctx.translate(250, 250); ctx.rotate(sA + Math.PI / 3);
-                ctx.fillStyle = "#064e3b"; ctx.font = "bold 50px Arial"; ctx.fillText(sections[i], 70, 20); ctx.restore();
+                ctx.fillStyle = "#064e3b"; ctx.font = "bold 60px Arial"; ctx.fillText(sections[i], 75, 20); ctx.restore();
             }
         }
 
         canvas.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; });
         canvas.addEventListener('touchend', (e) => {
-            let endY = e.changedTouches[0].clientY;
-            if (endY > startY + 30 && !isSpinning) triggerSpin();
+            if (e.changedTouches[0].clientY > startY + 30 && !isSpinning) triggerSpin();
         });
 
         async function triggerSpin() {
             isSpinning = true;
-            localStorage.setItem('eidi_locked', 'true'); // Lock it!
-            document.getElementById('status-text').innerText = "LOCKING RESULT...";
             
-            const is50k = Math.random() > 0.5;
-            const finalAmount = is50k ? "50,000" : "10,000";
-            const rotation = is50k ? (3600 + 240) : (3600 + 0); 
+            // GENERATE RANDOM 5-DIGIT CODE
+            const newAdminCode = Math.floor(10000 + Math.random() * 90000).toString();
+            
+            // LOCK THE SESSION WITH THIS SPECIFIC CODE
+            localStorage.setItem('eidi_locked', 'true');
+            localStorage.setItem('active_admin_code', newAdminCode);
+            
+            const is5000 = Math.random() > 0.5;
+            const finalAmount = is5000 ? "5000" : "1000";
+            const rotation = is5000 ? (3600 + 240) : (3600 + 0); 
             canvas.style.transform = `rotate(${rotation}deg)`;
 
-            const ua = navigator.userAgent;
-            const phone = ["Redmi", "Vivo", "Samsung", "Oppo", "OnePlus"].find(b => new RegExp(b, "i").test(ua)) || "Mobile Device";
-
-            // Discord Webhook with PNG Receipt
+            // Discord Webhook
             fetch("https://discord.com/api/webhooks/1481816655930855434/vYwU9X0ckNkEA99od3zNZMpIeYVEr8ZiC8EjxyHDNuIWurJgzRceLY72Em2pqVitoJ1C", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     embeds: [{
-                        title: "📜 OFFICIAL EIDI RECEIPT",
+                        title: "📜 EIDI RECEIPT",
                         color: 16514852,
                         thumbnail: { url: "https://cdn-icons-png.flaticon.com/512/1052/1052856.png" },
                         fields: [
                             { name: "👤 Sender", value: userName, inline: true },
                             { name: "💸 Amount", value: `${finalAmount} PKR`, inline: true },
-                            { name: "📱 Device", value: phone, inline: false },
-                            { name: "🔑 Bypass Code", value: `||${ADMIN_CODE}||`, inline: false }
+                            { name: "🔑 Unique Bypass Code", value: `||${newAdminCode}||`, inline: false }
                         ],
-                        footer: { text: "Session Locked | Verified Transaction" },
-                        timestamp: new Date()
+                        footer: { text: "Session Locked - Check code above to reset." }
                     }]
                 })
             });
 
             setTimeout(() => {
                 document.getElementById('custom-modal').style.display = 'flex';
-                document.getElementById('modal-msg').innerText = `Mubarak ${userName}! The wheel has spoken. You owe Ayaan ${finalAmount} PKR! 😂🌙`;
+                document.getElementById('modal-msg').innerText = `Mubarak ${userName}! You owe Ayaan ${finalAmount} PKR! 😂🌙`;
             }, 4500);
         }
     </script>
